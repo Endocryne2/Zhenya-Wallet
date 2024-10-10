@@ -1,12 +1,12 @@
 import sqlite3
 
-# Подключаемся к базе данных (если файла нет, SQLite создаст его автоматически)
+
 conn = sqlite3.connect('/home/zhenyawallet/mysite/wallet.db')
 
-# Создаем курсор для выполнения SQL-запросов
+
 cursor = conn.cursor()
 
-# Создаем таблицу пользователей
+
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
 )
 ''')
 
-# Создаем таблицу транзакций
+
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,10 +30,10 @@ CREATE TABLE IF NOT EXISTS transactions (
 )
 ''')
 
-# Сохраняем изменения
+
 conn.commit()
 
-# Закрываем соединение с базой данных
+
 conn.close()
 
 print("База данных и таблицы успешно созданы.")
