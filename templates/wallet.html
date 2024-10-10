@@ -9,7 +9,7 @@
     <title>Женя Wallet</title>
     <style>
         html, body {
-            overflow-x: hidden; /* Отключает горизонтальную прокрутку */
+            overflow-x: hidden; 
             background-color: #F5F6F7;
         }
         .header {
@@ -248,10 +248,10 @@
                 if (tab.id === tabId) {
                     if (activeTab === tabId) {
                         tab.style.display = 'none';
-                        activeTab = null; // Сбрасываем активную вкладку
+                        activeTab = null; 
                     } else {
                         tab.style.display = 'block';
-                        activeTab = tabId; // Обновляем активную вкладку
+                        activeTab = tabId; 
                     }
                 } else {
                     tab.style.display = 'none';
