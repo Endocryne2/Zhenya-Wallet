@@ -6,17 +6,14 @@ import random
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# Функция для подключения к базе данных
 def get_db():
     conn = sqlite3.connect('/home/zhenyawallet/mysite/wallet.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-# Генерация уникального адреса кошелька
 def generate_address():
     return sha256(str(random.randint(100000, 999999)).encode()).hexdigest()
 
-# Главная страница кошелька
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -28,7 +25,6 @@ def index():
             if user_data:
                 balance, address = user_data['balance'], user_data['address']
 
-                # Получение истории транзакций
                 cursor.execute('''
                     SELECT u.username as sender, v.username as receiver, t.amount, t.timestamp
                     FROM transactions t
@@ -42,7 +38,6 @@ def index():
                 return render_template('wallet.html', balance=balance, address=address, transactions=transactions)
     return redirect(url_for('login'))
 
-# Регистрация
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -57,12 +52,11 @@ def register():
         with get_db() as conn:
             cursor = conn.cursor()
 
-            # Проверяем, существует ли пользователь с таким же именем
             cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
             if cursor.fetchone():
                 flash('Пользователь с таким именем уже существует!', 'danger')
             else:
-                # Добавляем нового пользователя
+                
                 cursor.execute('INSERT INTO users (username, password, balance, address) VALUES (?, ?, ?, ?)',
                                (username, sha256(password.encode()).hexdigest(), 100, address))
                 flash('Регистрация прошла успешно!', 'success')
@@ -70,7 +64,7 @@ def register():
 
     return render_template('register.html')
 
-# Вход
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -91,14 +85,14 @@ def login():
 
     return render_template('login.html')
 
-# Выход
+
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('login'))
 
-# Пополнение баланса
+
 @app.route('/deposit', methods=['POST'])
 def deposit():
     if 'user_id' in session:
@@ -117,7 +111,7 @@ def deposit():
             flash('Некорректная сумма!', 'danger')
     return redirect(url_for('login'))
 
-# Перевод другому пользователю
+
 @app.route('/send', methods=['POST'])
 def send():
     if 'user_id' in session:
@@ -131,23 +125,23 @@ def send():
             with get_db() as conn:
                 cursor = conn.cursor()
 
-                # Найти получателя по адресу
+                
                 cursor.execute('SELECT id FROM users WHERE address = ?', (receiver_address,))
                 receiver = cursor.fetchone()
 
                 if receiver:
                     receiver_id = receiver['id']
 
-                    # Проверить баланс отправителя
+                    
                     cursor.execute('SELECT balance FROM users WHERE id = ?', (session['user_id'],))
                     sender_balance = cursor.fetchone()['balance']
 
                     if sender_balance >= amount:
-                        # Обновить баланс отправителя и получателя
+                        
                         cursor.execute('UPDATE users SET balance = balance - ? WHERE id = ?', (amount, session['user_id']))
                         cursor.execute('UPDATE users SET balance = balance + ? WHERE id = ?', (amount, receiver_id))
 
-                        # Записать транзакцию
+                        
                         cursor.execute('INSERT INTO transactions (sender_id, receiver_id, amount) VALUES (?, ?, ?)',
                                        (session['user_id'], receiver_id, amount))
                         flash('Перевод успешно выполнен!', 'success')
