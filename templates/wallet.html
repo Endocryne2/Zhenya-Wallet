@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Женя Wallet</title>
+    <style>
+        html, body {
+            overflow-x: hidden; /* Отключает горизонтальную прокрутку */
+            background-color: #F5F6F7;
+        }
+        .header {
+            background-color: #0088cc;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .balance {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .balance-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0088cc;
+            margin: 5px 0;
+        }
+        .currency-symbol {
+            font-size: 18px;
+            color: #555;
+        }
+        .address {
+            font-size: 16px;
+            color: #555;
+            margin-top: 10px;
+        }
+        .wallet-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .wallet-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .wallet-item:last-child {
+            border-bottom: none;
+        }
+        .wallet-item img {
+            width: 30px;
+            height: 30px;
+            margin-right: 15px;
+        }
+        .currency {
+            display: flex;
+            align-items: center;
+        }
+        .currency-details {
+            margin-left: 15px;
+        }
+        .currency-name {
+            font-weight: bold;
+        }
+        .currency-amount {
+            font-size: 14px;
+            color: #555;
+        }
+        .btn-icon {
+            background-color: transparent;
+            border: none;
+            color: #0088cc;
+            font-size: 24px;
+            cursor: pointer;
+            margin: 0 10px;
+            text-align: center;
+        }
+        .btn-icon:hover {
+            color: #007bb5;
+        }
+        .icon-text {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .copy-icon {
+            cursor: pointer;
+            color: #0088cc;
+            margin-left: 10px;
+        }
+        .copy-icon:hover {
+            color: #007bb5;
+        }
+        .p2p-unavailable, .deposit-unavailable {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        .p2p-unavailable img, .deposit-unavailable img {
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="header">
+            <h1>Женя Wallet💲</h1>
+        </div>
+
+        <div class="wallet-card text-center">
+            <p class="balance">Ваш баланс:</p>
+            <p class="balance-amount">{{ balance }} <span class="currency-symbol">$ZHY</span></p>
+            <p class="address">
+                Ваша адреса гаманця: <strong>{{ address }}</strong>
+                <i class="fas fa-copy copy-icon" onclick="copyAddress()" title="Копіювати"></i>
+            </p>
+            <div class="mt-4">
+                <div>
+                    <button class="btn-icon" onclick="showTab('deposit')" title="Поповнити">
+                        <i class="fas fa-plus-circle"></i>
+                        <div class="icon-text">Поповнити</div>
+                    </button>
+                    <button class="btn-icon" onclick="showTab('send')" title="Надіслати">
+                        <i class="fas fa-paper-plane"></i>
+                        <div class="icon-text">Надіслати</div>
+                    </button>
+                    <button class="btn-icon" onclick="showTab('history')" title="Історія">
+                        <i class="fas fa-history"></i>
+                        <div class="icon-text">Історія</div>
+                    </button>
+                    <button class="btn-icon" onclick="showTab('p2p')" title="P2P Market">
+                        <i class="fas fa-exchange-alt"></i>
+                        <div class="icon-text">P2P Market</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="deposit" class="wallet-card tab-content" style="display:none;">
+            <h3>Поповнити баланс</h3>
+            <div class="deposit-unavailable">
+                <img src="https://i.gifer.com/3jnq.gif" alt="Технічні роботи">
+                <p>Поповнення тимчасово недоступне.</p>
+            </div>
+        </div>
+
+        <div id="send" class="wallet-card tab-content" style="display:none;">
+            <h3>Надіслати іншому користувачеві</h3>
+            <form action="{{ url_for('send') }}" method="POST">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="receiver" placeholder="Адреса одержувача" required>
+                    <input type="number" class="form-control" name="amount" placeholder="Сума" required>
+                    <button class="btn btn-primary" type="submit">Надіслати</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="history" class="wallet-card tab-content" style="display:none;">
+            <h3>Історія транзакцій</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Відправник</th>
+                        <th>Одержувач</th>
+                        <th>Сума</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.sender }}</td>
+                        <td>{{ transaction.receiver }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>{{ transaction.timestamp }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="p2p" class="wallet-card tab-content" style="display:none;">
+            <h3>P2P Market</h3>
+            <div class="p2p-unavailable">
+                <img src="https://i.gifer.com/3jnq.gif" alt="Технічні роботи">
+                <p>P2P Market на технічних роботах.</p>
+            </div>
+        </div>
+
+        <div class="wallet-card">
+            <h3>Інші активи</h3>
+            <div class="wallet-item">
+                <div class="currency">
+                    <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=023" alt="Доллары">
+                    <div class="currency-details">
+                        <span class="currency-name">Долари</span><br>
+                        <span class="currency-amount">41 ₴ | 0 USDT</span>
+                    </div>
+                </div>
+            </div>
+            <div class="wallet-item">
+                <div class="currency">
+                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=023" alt="Bitcoin">
+                    <div class="currency-details">
+                        <span class="currency-name">Bitcoin</span><br>
+                        <span class="currency-amount">2 601 800,36 ₴ | 0 BTC</span>
+                    </div>
+                </div>
+            </div>
+            <div class="wallet-item">
+                <div class="currency">
+                    <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=023" alt="Ethereum">
+                    <div class="currency-details">
+                        <span class="currency-name">Ethereum</span><br>
+                        <span class="currency-amount">99 808,90 ₴ | 0 ETH</span>
+                    </div>
+                </div>
+            </div>
+            <div class="wallet-item">
+                <div class="currency">
+                    <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=023" alt="Toncoin">
+                    <div class="currency-details">
+                        <span class="currency-name">Toncoin</span><br>
+                        <span class="currency-amount">309,59 ₴ | 0 TON</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activeTab = null;
+
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                if (tab.id === tabId) {
+                    if (activeTab === tabId) {
+                        tab.style.display = 'none';
+                        activeTab = null; // Сбрасываем активную вкладку
+                    } else {
+                        tab.style.display = 'block';
+                        activeTab = tabId; // Обновляем активную вкладку
+                    }
+                } else {
+                    tab.style.display = 'none';
+                }
+            });
+        }
+
+        function copyAddress() {
+            const address = document.querySelector('.address strong').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                alert('Адресу скопійовано в буфер обміну!');
+            }).catch(err => {
+                console.error('Ошибка при копировании адреса: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
