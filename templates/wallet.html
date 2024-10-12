@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Женя Wallet</title>
     <style>
         html, body {
-            overflow-x: hidden; 
+            overflow-x: hidden; /* Отключает горизонтальную прокрутку */
             background-color: #F5F6F7;
         }
         .header {
@@ -18,6 +18,7 @@
             padding: 20px;
             text-align: center;
             border-radius: 10px 10px 0 0;
+            position: relative; /* Добавлено для позиционирования кнопки */
         }
         .balance {
             font-size: 24px;
@@ -110,11 +111,66 @@
             width: 150px;
             height: 150px;
         }
+        .settings {
+            display: none; /* Скрываем блок настроек по умолчанию */
+        }
+        .tap-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tap-button:hover {
+            background-color: #007bb5;
+        }
+        .tap-button i {
+            margin-right: 8px; /* Отступ между иконкой и текстом */
+        }
+        .settings-button {
+            position: absolute; /* Позиционирование кнопки */
+            left: 20px; /* Отступ слева */
+            top: 20px; /* Отступ сверху */
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .settings-button:hover {
+            color: #007bb5;
+        }
+
+        .logout-button {
+            position: absolute; /* Позиционирование кнопки выхода */
+            right: 20px; /* Отступ справа */
+            top: 20px; /* Отступ сверху */
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            color: #ff4d4d; /* Цвет при наведении */
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <div class="header">
+            <button class="settings-button" onclick="showTab('settings')" title="Налаштування">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="logout-button" onclick="showLogoutModal()" title="Вийти">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
             <h1>Женя Wallet💲</h1>
         </div>
 
@@ -146,6 +202,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- Модальное окно для подтверждения выхода -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="logoutModalLabel">Підтвердьте вихід</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Ви точно хочете вийти?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Так, вийти</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Подключение Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <!-- Подключение Bootstrap и jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
         <div id="deposit" class="wallet-card tab-content" style="display:none;">
             <h3>Поповнити баланс</h3>
@@ -194,18 +276,26 @@
             <h3>P2P Market</h3>
             <div class="p2p-unavailable">
                 <img src="https://i.gifer.com/3jnq.gif" alt="Технічні роботи">
-                <p>P2P Market на технічних роботах.</p>
+                <p>P2P Market тимчасово недоступний.</p>
             </div>
+        </div>
+
+        <div id="settings" class="wallet-card settings tab-content">
+            <h3>Налаштування</h3>
+            <p>Тут ви можете налаштувати свій гаманець.</p>
+            <button class="tap-button" onclick="window.location.href='https://zhenyawallet.pythonanywhere.com/clicker'">
+                <i class="fas fa-hand-pointer"></i> Перейти до Клікера
+            </button>
         </div>
 
         <div class="wallet-card">
             <h3>Інші активи</h3>
             <div class="wallet-item">
                 <div class="currency">
-                    <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=023" alt="Доллары">
+                    <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=023" alt="Tether">
                     <div class="currency-details">
-                        <span class="currency-name">Долари</span><br>
-                        <span class="currency-amount">41 ₴ | 0 USDT</span>
+                        <div class="currency-name">Tether (USDT)</div>
+                        <div class="currency-amount">41,15₴ | 0 USDT</div>
                     </div>
                 </div>
             </div>
@@ -213,8 +303,8 @@
                 <div class="currency">
                     <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=023" alt="Bitcoin">
                     <div class="currency-details">
-                        <span class="currency-name">Bitcoin</span><br>
-                        <span class="currency-amount">2 601 800,36 ₴ | 0 BTC</span>
+                        <div class="currency-name">Bitcoin (BTC)</div>
+                        <div class="currency-amount">2 605 947,77₴ | 0 BTC</div>
                     </div>
                 </div>
             </div>
@@ -222,8 +312,8 @@
                 <div class="currency">
                     <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=023" alt="Ethereum">
                     <div class="currency-details">
-                        <span class="currency-name">Ethereum</span><br>
-                        <span class="currency-amount">99 808,90 ₴ | 0 ETH</span>
+                        <div class="currency-name">Ethereum (ETH)</div>
+                        <div class="currency-amount">98 263,73₴ | 0 ETH</div>
                     </div>
                 </div>
             </div>
@@ -231,42 +321,68 @@
                 <div class="currency">
                     <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=023" alt="Toncoin">
                     <div class="currency-details">
-                        <span class="currency-name">Toncoin</span><br>
-                        <span class="currency-amount">309,59 ₴ | 0 TON</span>
+                        <div class="currency-name">Toncoin (TON)</div>
+                        <div class="currency-amount">210,20₴ | 0 TON</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let activeTab = null;
-
-        function showTab(tabId) {
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => {
-                if (tab.id === tabId) {
-                    if (activeTab === tabId) {
-                        tab.style.display = 'none';
-                        activeTab = null; 
-                    } else {
-                        tab.style.display = 'block';
-                        activeTab = tabId; 
-                    }
-                } else {
-                    tab.style.display = 'none';
-                }
+        function copyAddress() {
+            const address = "{{ address }}";
+            navigator.clipboard.writeText(address).then(() => {
+                alert("Адресу скопійовано!");
             });
         }
 
-        function copyAddress() {
-            const address = document.querySelector('.address strong').textContent;
-            navigator.clipboard.writeText(address).then(() => {
-                alert('Адресу скопійовано в буфер обміну!');
-            }).catch(err => {
-                console.error('Ошибка при копировании адреса: ', err);
-            });
+        function showTab(tab) {
+            const $tab = $('#' + tab);
+            // Переключаем видимость выбранного таба
+            if ($tab.is(':visible')) {
+                $tab.hide(); // Закрыть, если он уже открыт
+            } else {
+                $('.tab-content').hide(); // Скрыть все табы
+                $tab.show(); // Показать выбранный таб
+            }
         }
     </script>
+</body>
+</html>
+
+<script>
+    function showLogoutModal() {
+      var logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+      logoutModal.show();
+    }
+
+    document.getElementById('confirmLogout').addEventListener('click', function() {
+      // Здесь можно реализовать действие выхода
+      window.location.href = '/logout'; // Пример действия - редирект на страницу выхода
+    });
+  </script>
+
+  <script>
+    function copyAddress() {
+        const address = "{{ address }}";
+        navigator.clipboard.writeText(address).then(() => {
+            alert("Адресу скопійовано!");
+        });
+    }
+
+    function showTab(tab) {
+        const $tab = $('#' + tab);
+        // Переключаем видимость выбранного таба
+        if ($tab.is(':visible')) {
+            $tab.hide(); // Закрыть, если он уже открыт
+        } else {
+            $('.tab-content').hide(); // Скрыть все табы
+            $tab.show(); // Показать выбранный таб
+        }
+    }
+</script>
 </body>
 </html>
