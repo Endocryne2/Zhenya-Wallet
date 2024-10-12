@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Кликер</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMj/kGClQGRWjXY7bH8M2AZn97cS7k11QwR5d" crossorigin="anonymous">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #000000, #FFD700); /* Черный к желтому */
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            width: 90%; /* Ширина контейнера */
+            max-width: 400px; /* Максимальная ширина контейнера */
+        }
+        #coin-counter {
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        #click-image {
+            width: 300px; /* Установи нужный размер изображения */
+            height: 300px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #click-image:hover {
+            transform: scale(1.1); /* Увеличение изображения при наведении */
+        }
+        .wallet-container {
+            text-align: center; /* Центрируем содержимое блока */
+            display: none; /* Скрываем блок с вводом по умолчанию */
+            margin-top: 20px; /* Отступ сверху */
+        }
+        #wallet-address {
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 350px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+        #send-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #000; /* Темный текст для контраста */
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .toggle-wallet-button {
+            margin-top: 30px; /* Отступ сверху */
+            padding: 10px 20px;
+            background-color: #fff;
+            color: #000; /* Темный текст для контраста */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-wallet-button i {
+            font-size: 30px; /* Размер иконки Font Awesome */
+            margin-right: 8px; /* Отступ между иконкой и текстом */
+        }
+        .block {
+            padding: 20px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            width: 100%; /* Полная ширина блока */
+            max-width: 400px; /* Максимальная ширина блока */
+        }
+        #redirect-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #redirect-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container block">
+        <p id="coin-counter">Ваши коины: <span>0</span></p>
+        <img src="{{ url_for('static', filename='my_coin.png') }}" alt="Кликни меня" id="click-image" />
+    </div>
+
+    <div class="wallet-container block" id="wallet-container">
+        <input type="text" id="wallet-address" placeholder="Введите адрес кошелька" />
+        <button id="send-button">Отправить коины</button>
+    </div>
+
+    <button class="toggle-wallet-button" id="toggle-wallet-button">
+        <i class="fas fa-wallet"></i> Открыть кошелек
+    </button>
+
+    <!-- Кнопка перенаправления -->
+    <button id="redirect-button" onclick="window.location.href='https://zhenyawallet.pythonanywhere.com/'">Перейти в кошелек</button>
+
+    <script>
+        // Загружаем количество монет из localStorage
+        let coins = parseInt(localStorage.getItem('coins')) || 0;
+
+        // Обновляем отображение монет на странице
+        document.getElementById("coin-counter").getElementsByTagName('span')[0].innerText = coins;
+
+        document.getElementById("click-image").addEventListener("click", function() {
+            coins += 1;
+            document.getElementById("coin-counter").getElementsByTagName('span')[0].innerText = coins;
+
+            // Сохраняем количество монет в localStorage
+            localStorage.setItem('coins', coins);
+        });
+
+        // Обработчик нажатия кнопки "Открыть/Закрыть кошелек"
+        document.getElementById("toggle-wallet-button").addEventListener("click", function() {
+            const walletContainer = document.getElementById("wallet-container");
+            if (walletContainer.style.display === "none") {
+                walletContainer.style.display = "block"; // Показываем блок с вводом
+                this.innerHTML = '<i class="fas fa-times"></i> Закрыть кошелек'; // Меняем текст на "Закрыть"
+            } else {
+                walletContainer.style.display = "none"; // Скрываем блок с вводом
+                this.innerHTML = '<i class="fas fa-wallet"></i> Открыть кошелек'; // Меняем текст на "Открыть"
+                document.getElementById("wallet-address").value = ''; // Очищаем поле ввода
+            }
+        });
+
+        document.getElementById("send-button").addEventListener("click", function() {
+            const walletAddress = document.getElementById("wallet-address").value;
+
+            if (!walletAddress) {
+                alert("Введите адрес кошелька!");
+                return;
+            }
+
+            // Отправляем монеты на сервер
+            fetch("/earn_coins", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ amount: coins, address: walletAddress })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Коины отправлены на кошелек " + walletAddress);
+                    coins = 0; // Сброс счетчика
+                    localStorage.setItem('coins', coins); // Сохраняем в localStorage
+                    document.getElementById("coin-counter").getElementsByTagName('span')[0].innerText = coins;
+                    document.getElementById("wallet-address").value = ''; // Очищаем поле ввода
+                    document.getElementById("wallet-container").style.display = "none"; // Скрываем блок с вводом
+                    document.getElementById("toggle-wallet-button").innerHTML = '<i class="fas fa-wallet"></i> Открыть кошелек'; // Возвращаем текст кнопки
+                } else {
+                    alert("Ошибка: " + data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
