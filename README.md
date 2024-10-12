@@ -10,7 +10,8 @@
 - **История транзакций**: Легкий доступ к информации о всех ваших транзакциях.
 - **Регистрация и вход в систему**: Безопасный доступ к вашему кошельку.
 
-  ![image](https://github.com/user-attachments/assets/5baa14d3-7626-4827-8c43-6e8fd65d7a4a)
+![image](https://github.com/user-attachments/assets/de554f7c-a0c4-443d-9f0a-80dfecfdf63f)
+
 
 
 ## Установка
